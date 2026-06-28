@@ -2,11 +2,37 @@
 local M = {}
 
 local config_module = require("monokai-pro.config")
+local day_night_augroup = vim.api.nvim_create_augroup("MonokaiProDayNight", { clear = true })
+
+local function setup_day_night_autocmd()
+  vim.api.nvim_clear_autocmds({ group = day_night_augroup })
+
+  local config = config_module.get()
+  local day_night = config.day_night
+  if not (day_night and day_night.enable) then
+    return
+  end
+
+  vim.api.nvim_create_autocmd("OptionSet", {
+    group = day_night_augroup,
+    pattern = "background",
+    callback = function()
+      local previous_filter = config_module.get().filter
+
+      config_module.apply_appearance()
+
+      if vim.g.colors_name == "monokai-pro" and config_module.get().filter ~= previous_filter then
+        M.load()
+      end
+    end,
+  })
+end
 
 --- Setup the colorscheme with user options
 ---@param user_config? MonokaiPro.Config
 function M.setup(user_config)
   config_module.setup(user_config)
+  setup_day_night_autocmd()
 end
 
 --- Load the colorscheme
@@ -28,7 +54,11 @@ function M.set_filter(filter)
   if not config_module.is_valid_filter(filter) then
     vim.notify(
       -- style: ignore
-      string.format("MonokaiPro: Invalid filter '%s'. Valid options: %s", filter, table.concat(config_module.get_filters(), ", ")),
+      string.format(
+        "MonokaiPro: Invalid filter '%s'. Valid options: %s",
+        filter,
+        table.concat(config_module.get_filters(), ", ")
+      ),
       vim.log.levels.WARN
     )
     return

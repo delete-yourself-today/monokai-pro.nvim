@@ -77,7 +77,7 @@ local defaults = {
   filter = "pro",
   day_night = {
     enable = false,
-    day_filter = "pro",
+    day_filter = "light",
     night_filter = "spectrum",
   },
   inc_search = "background",

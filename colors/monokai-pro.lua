@@ -1,1 +1,1 @@
-require("monokai-pro").set_filter("pro")
+require("monokai-pro").load()

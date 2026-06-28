@@ -87,7 +87,7 @@ require("monokai-pro").setup({
   filter = "pro", -- classic | octagon | pro | machine | ristretto | spectrum
   day_night = {
     enable = false,
-    day_filter = "pro",
+    day_filter = "light",
     night_filter = "spectrum",
   },
   inc_search = "background", -- underline | background

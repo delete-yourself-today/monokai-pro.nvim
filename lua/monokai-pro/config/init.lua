@@ -6,21 +6,31 @@ local defaults = require("monokai-pro.config.defaults")
 ---@type MonokaiPro.Config
 local current_config = vim.deepcopy(defaults)
 
+--- Resolve the filter for the current appearance.
+---@return MonokaiPro.Filter
+function M.resolve_filter()
+  local day_night = current_config.day_night
+  if day_night and day_night.enable then
+    return vim.o.background == "light" and day_night.day_filter or day_night.night_filter
+  end
+
+  if vim.o.background == "light" and current_config.filter ~= "light" then
+    return "light"
+  end
+
+  return current_config.filter or defaults.filter
+end
+
+--- Apply appearance-sensitive filter settings to the current config.
+function M.apply_appearance()
+  current_config.filter = M.resolve_filter()
+end
+
 --- Setup the configuration
 ---@param user_config? MonokaiPro.Config
 function M.setup(user_config)
   current_config = vim.tbl_deep_extend("force", vim.deepcopy(defaults), user_config or {})
-
-  -- Handle day/night mode
-  local day_night = current_config.day_night
-  if day_night and day_night.enable then
-    current_config.filter = M.is_daytime() and day_night.day_filter or day_night.night_filter
-  end
-
-  -- Handle light background
-  if vim.o.background == "light" and current_config.filter ~= "light" then
-    current_config.filter = "light"
-  end
+  M.apply_appearance()
 end
 
 --- Extend the current configuration (used when switching filters)
@@ -35,11 +45,10 @@ function M.get()
   return current_config
 end
 
---- Check if the current time is daytime (6am to 6pm)
+--- Check if the current appearance is light.
 ---@return boolean
 function M.is_daytime()
-  local current_hour = tonumber(os.date("%H"))
-  return current_hour >= 6 and current_hour < 18
+  return vim.o.background == "light"
 end
 
 --- Get all available filters
